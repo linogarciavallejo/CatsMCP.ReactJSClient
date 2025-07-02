@@ -71,7 +71,7 @@ export class OllamaService implements LLMServiceInterface {
       const toolCallMatch = this.extractToolCall(assistantResponse);
       
       if (toolCallMatch) {
-        return await this.handleToolCall(toolCallMatch, assistantResponse);
+        return await this.handleToolCall(toolCallMatch);
       } else {
         // Regular text response
         this.conversationHistory.push({
@@ -153,7 +153,7 @@ assistant:`;
     return null;
   }
 
-  private async handleToolCall(toolCall: { name: string; parameters: any }, originalResponse: string): Promise<string> {
+  private async handleToolCall(toolCall: { name: string; parameters: any }): Promise<string> {
     try {
       // Execute the tool call
       const result = await this.mockToolCall(toolCall.name, toolCall.parameters);

@@ -81,7 +81,7 @@ export interface ToolsListProps {
 
 export interface ChatInterfaceProps {
   llmService: LLMServiceInterface | null;
-  mcpClient: McpClientInterface | null;
+  mcpClient?: McpClientInterface | null;
 }
 
 // Service Interfaces

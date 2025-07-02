@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { ChatInterfaceProps, ChatMessage } from '../types';
 
-const ChatInterface: React.FC<ChatInterfaceProps> = ({ llmService, mcpClient }) => {
+const ChatInterface: React.FC<ChatInterfaceProps> = ({ llmService }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: uuidv4(),

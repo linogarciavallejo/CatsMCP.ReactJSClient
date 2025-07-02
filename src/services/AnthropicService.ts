@@ -25,8 +25,8 @@ export class AnthropicService implements LLMServiceInterface {
     this.config = config as AnthropicConfig;
     this.client = new Anthropic({
       apiKey: this.config.apiKey!,
-      dangerouslyAllowBrowser: true // Only for demo purposes - in production, use a backend proxy
-    });
+      // Note: In production, use a backend proxy instead of browser-side API calls
+    } as any);
     
     this.tools = tools;
   }
@@ -198,7 +198,11 @@ export class AnthropicService implements LLMServiceInterface {
     return mcpTools.map(tool => ({
       name: tool.name,
       description: tool.description,
-      input_schema: tool.inputSchema
+      input_schema: {
+        type: "object" as const,
+        properties: tool.inputSchema.properties,
+        required: tool.inputSchema.required
+      }
     }));
   }
 

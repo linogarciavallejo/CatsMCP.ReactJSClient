@@ -20,7 +20,6 @@ import {
  */
 export class McpClient implements McpClientInterface {
   private connected: boolean = false;
-  private serverConfig: McpServerConfig | null = null;
   private tools: McpTool[] = [];
 
   async connect(serverConfig: McpServerConfig): Promise<void> {
@@ -32,7 +31,6 @@ export class McpClient implements McpClientInterface {
       // Simulate connection delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      this.serverConfig = serverConfig;
       this.connected = true;
       
       // Mock some tools based on common MCP patterns
@@ -46,7 +44,6 @@ export class McpClient implements McpClientInterface {
 
   async disconnect(): Promise<void> {
     this.connected = false;
-    this.serverConfig = null;
     this.tools = [];
     console.log('Disconnected from MCP server');
   }
