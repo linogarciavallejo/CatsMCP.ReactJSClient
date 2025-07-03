@@ -4,7 +4,8 @@ import {
   McpTool, 
   LLMConfig, 
   OllamaConfig,
-  LLMError 
+  LLMError,
+  McpClientInterface 
 } from '../types';
 
 /**
@@ -16,8 +17,9 @@ export class OllamaService implements LLMServiceInterface {
   private tools: McpTool[];
   private conversationHistory: Array<{ role: string; content: string }> = [];
   private config: OllamaConfig;
+  private mcpClient: McpClientInterface;
 
-  constructor(config: LLMConfig, tools: McpTool[] = []) {
+  constructor(config: LLMConfig, tools: McpTool[] = [], mcpClient: McpClientInterface) {
     if (config.provider !== 'ollama') {
       throw new LLMError('Invalid provider for OllamaService', 'ollama');
     }
@@ -32,6 +34,7 @@ export class OllamaService implements LLMServiceInterface {
     });
     
     this.tools = tools;
+    this.mcpClient = mcpClient;
   }
 
   updateTools(tools: McpTool[]): void {
@@ -155,8 +158,16 @@ assistant:`;
 
   private async handleToolCall(toolCall: { name: string; parameters: any }): Promise<string> {
     try {
-      // Execute the tool call
-      const result = await this.mockToolCall(toolCall.name, toolCall.parameters);
+      // Execute the real tool call via MCP client
+      const mcpResult = await this.mcpClient.callTool(toolCall.name, toolCall.parameters);
+      
+      // Handle the MCP result format
+      let result;
+      if (mcpResult.success) {
+        result = mcpResult.result;
+      } else {
+        throw new Error(mcpResult.error || 'Tool call failed');
+      }
       
       // Add the tool call and result to conversation history
       this.conversationHistory.push({
@@ -194,67 +205,6 @@ Please provide a helpful response to the user based on this tool result.`;
         content: errorMessage
       });
       return errorMessage;
-    }
-  }
-
-  private async mockToolCall(toolName: string, parameters: any): Promise<any> {
-    // This is a mock implementation - in reality, this would call mcpClient.callTool()
-    console.log(`Mock tool call: ${toolName}`, parameters);
-    
-    // Simulate the tool call delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Return mock responses based on tool name
-    switch (toolName) {
-      case 'get_weather':
-        return {
-          location: parameters.location,
-          temperature: '72°F',
-          condition: 'Sunny',
-          humidity: '45%',
-          wind: '5 mph NW'
-        };
-      
-      case 'calculate':
-        try {
-          const result = Function(`"use strict"; return (${parameters.expression})`)();
-          return {
-            expression: parameters.expression,
-            result: result
-          };
-        } catch (error: any) {
-          throw new Error(`Calculation error: ${error.message}`);
-        }
-      
-      case 'mcp_manitasmcp_GetCats':
-        return [
-          { name: 'Whiskers', breed: 'Persian', age: 3 },
-          { name: 'Mittens', breed: 'Siamese', age: 5 },
-          { name: 'Shadow', breed: 'Maine Coon', age: 2 }
-        ];
-      
-      case 'mcp_manitasmcp_GetCat':
-        return {
-          name: parameters.name,
-          breed: 'British Shorthair',
-          age: 4,
-          personality: 'Friendly and playful'
-        };
-      
-      case 'mcp_manitasmcp_Echo':
-        return {
-          message: parameters.message,
-          echoed_at: new Date().toISOString()
-        };
-      
-      case 'echo':
-        return {
-          message: parameters.message,
-          echoed_at: new Date().toISOString()
-        };
-      
-      default:
-        throw new Error(`Unknown tool: ${toolName}`);
     }
   }
 

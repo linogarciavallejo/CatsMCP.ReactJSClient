@@ -4,7 +4,8 @@ import {
   McpTool, 
   LLMConfig, 
   AnthropicConfig,
-  LLMError 
+  LLMError,
+  McpClientInterface 
 } from '../types';
 
 /**
@@ -16,8 +17,9 @@ export class AnthropicService implements LLMServiceInterface {
   private tools: McpTool[];
   private conversationHistory: Anthropic.Messages.MessageParam[] = [];
   private config: AnthropicConfig;
+  private mcpClient: McpClientInterface;
 
-  constructor(config: LLMConfig, tools: McpTool[] = []) {
+  constructor(config: LLMConfig, tools: McpTool[] = [], mcpClient: McpClientInterface) {
     if (config.provider !== 'anthropic') {
       throw new LLMError('Invalid provider for AnthropicService', 'anthropic');
     }
@@ -29,6 +31,7 @@ export class AnthropicService implements LLMServiceInterface {
     } as any);
     
     this.tools = tools;
+    this.mcpClient = mcpClient;
   }
 
   updateTools(tools: McpTool[]): void {
@@ -86,8 +89,16 @@ export class AnthropicService implements LLMServiceInterface {
     for (const content of response.content) {
       if (content.type === 'tool_use') {
         try {
-          // In a real implementation, this would call the actual MCP client
-          const result = await this.mockToolCall(content.name, content.input);
+          // Call the real MCP client
+          const mcpResult = await this.mcpClient.callTool(content.name, content.input as Record<string, any>);
+          
+          // Handle the MCP result format
+          let result;
+          if (mcpResult.success) {
+            result = mcpResult.result;
+          } else {
+            throw new Error(mcpResult.error || 'Tool call failed');
+          }
           
           toolResults.push({
             type: 'tool_result',
@@ -131,67 +142,6 @@ export class AnthropicService implements LLMServiceInterface {
       .join('');
 
     return finalTextContent;
-  }
-
-  private async mockToolCall(toolName: string, parameters: any): Promise<any> {
-    // This is a mock implementation - in reality, this would call mcpClient.callTool()
-    console.log(`Mock tool call: ${toolName}`, parameters);
-    
-    // Simulate the tool call delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Return mock responses based on tool name
-    switch (toolName) {
-      case 'get_weather':
-        return {
-          location: parameters.location,
-          temperature: '72°F',
-          condition: 'Sunny',
-          humidity: '45%',
-          wind: '5 mph NW'
-        };
-      
-      case 'calculate':
-        try {
-          const result = Function(`"use strict"; return (${parameters.expression})`)();
-          return {
-            expression: parameters.expression,
-            result: result
-          };
-        } catch (error: any) {
-          throw new Error(`Calculation error: ${error.message}`);
-        }
-      
-      case 'mcp_manitasmcp_GetCats':
-        return [
-          { name: 'Whiskers', breed: 'Persian', age: 3 },
-          { name: 'Mittens', breed: 'Siamese', age: 5 },
-          { name: 'Shadow', breed: 'Maine Coon', age: 2 }
-        ];
-      
-      case 'mcp_manitasmcp_GetCat':
-        return {
-          name: parameters.name,
-          breed: 'British Shorthair',
-          age: 4,
-          personality: 'Friendly and playful'
-        };
-      
-      case 'mcp_manitasmcp_Echo':
-        return {
-          message: parameters.message,
-          echoed_at: new Date().toISOString()
-        };
-      
-      case 'echo':
-        return {
-          message: parameters.message,
-          echoed_at: new Date().toISOString()
-        };
-      
-      default:
-        throw new Error(`Unknown tool: ${toolName}`);
-    }
   }
 
   private convertToolsToAnthropicFormat(mcpTools: McpTool[]): Anthropic.Messages.Tool[] {

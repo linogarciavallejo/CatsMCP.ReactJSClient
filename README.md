@@ -101,6 +101,50 @@ The application consists of several key components:
 
 4. Open your browser to `http://localhost:3000`
 
+## Environment Configuration
+
+You can optionally configure the application using environment variables to avoid entering API keys in the UI every time.
+
+### Setting Up Environment Variables
+
+1. Copy the example environment file:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Edit `.env` and add your API keys:
+   ```bash
+   # LLM Provider API Keys
+   VITE_ANTHROPIC_API_KEY=your_anthropic_api_key_here
+   VITE_OPENAI_API_KEY=your_openai_api_key_here
+   
+   # Ollama Configuration
+   VITE_OLLAMA_BASE_URL=http://localhost:11434
+   
+   # MCP Server Configuration (optional defaults)
+   VITE_DEFAULT_SERVER_COMMAND=python
+   VITE_DEFAULT_SERVER_ARGS=../QuickstartWeatherServer/server.py
+   
+   # Default LLM Provider
+   VITE_DEFAULT_LLM_PROVIDER=anthropic
+   
+   # Default Models
+   VITE_DEFAULT_ANTHROPIC_MODEL=claude-3-5-sonnet-20241022
+   VITE_DEFAULT_OPENAI_MODEL=gpt-4-turbo-preview
+   VITE_DEFAULT_OLLAMA_MODEL=deepseek-coder
+   ```
+
+3. Restart the development server after changing environment variables
+
+### Environment Variable Benefits
+
+- **Security**: Keep API keys out of the UI
+- **Convenience**: Pre-fill form fields with your preferred settings
+- **Team Setup**: Share default configurations without exposing credentials
+- **CI/CD**: Easy integration with deployment pipelines
+
+**Note**: When environment variables are set, the UI will show "(loaded from environment)" and you can still override them if needed.
+
 ## Usage
 
 ### Connecting to an MCP Server

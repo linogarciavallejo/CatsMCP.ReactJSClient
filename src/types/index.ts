@@ -1,3 +1,12 @@
+// Language Support
+export type SupportedLanguage = 'en' | 'es';
+
+export interface LanguageConfig {
+  code: SupportedLanguage;
+  name: string;
+  nativeName: string;
+}
+
 // Core MCP Types
 export interface McpTool {
   name: string;
@@ -10,10 +19,11 @@ export interface McpTool {
 }
 
 export interface McpServerConfig {
-  type: 'stdio' | 'websocket';
+  type: 'stdio' | 'websocket' | 'http';
   command?: string;
   arguments?: string[];
   url?: string;
+  language?: SupportedLanguage;
 }
 
 export interface McpToolCall {
@@ -73,15 +83,19 @@ export interface ConnectionManagerProps {
   onDisconnect: () => Promise<void>;
   connectionStatus: ConnectionStatus;
   statusMessage: string;
+  selectedLanguage?: SupportedLanguage;
+  onLanguageChange?: (language: SupportedLanguage) => void;
 }
 
 export interface ToolsListProps {
   tools: McpTool[];
+  language?: SupportedLanguage;
 }
 
 export interface ChatInterfaceProps {
   llmService: LLMServiceInterface | null;
   mcpClient?: McpClientInterface | null;
+  language?: SupportedLanguage;
 }
 
 // Service Interfaces
@@ -89,8 +103,9 @@ export interface McpClientInterface {
   connect(config: McpServerConfig): Promise<void>;
   disconnect(): Promise<void>;
   listTools(): Promise<McpTool[]>;
-  callTool(name: string, parameters: Record<string, any>): Promise<McpToolResult>;
+  callTool(name: string, parameters: Record<string, any>, language?: SupportedLanguage): Promise<McpToolResult>;
   isConnected(): boolean;
+  setLanguage(language: SupportedLanguage): void;
 }
 
 export interface LLMServiceInterface {

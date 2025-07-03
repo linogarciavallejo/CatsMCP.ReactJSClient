@@ -1,13 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { ChatInterfaceProps, ChatMessage } from '../types';
+import { getTranslation } from '../config/languages';
 
-const ChatInterface: React.FC<ChatInterfaceProps> = ({ llmService }) => {
+const ChatInterface: React.FC<ChatInterfaceProps> = ({ llmService, language = 'en' }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: uuidv4(),
       type: 'system',
-      content: 'MCP Client Ready! You can now interact with the connected tools through your chosen LLM.',
+      content: getTranslation(language, 'mcpClientReady'),
       timestamp: new Date()
     }
   ]);
@@ -77,12 +78,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ llmService }) => {
     return timestamp.toLocaleTimeString();
   };
 
-  return (
-    <div className="chat-section">
+  return (    <div className="chat-section">
       <div className="chat-header">
-        <h2>Chat with LLM + MCP Tools</h2>
+        <h2>{getTranslation(language, 'chatWithLlm')}</h2>
       </div>
-      
+
       <div className="chat-messages">
         {messages.map((message) => (
           <div key={message.id} className={`message ${message.type}`}>
@@ -113,7 +113,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ llmService }) => {
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Ask the LLM to use the available tools..."
+              placeholder={getTranslation(language, 'typeMessage')}
               disabled={isLoading}
             />
             <button 
@@ -121,7 +121,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ llmService }) => {
               className="btn"
               disabled={isLoading || !inputValue.trim()}
             >
-              Send
+              {getTranslation(language, 'send')}
             </button>
           </div>
         </form>

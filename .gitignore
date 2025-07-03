@@ -91,3 +91,8 @@ jspm_packages/
 
 # DynamoDB Local files
 .dynamodb/
+ENVIRONMENT_VARIABLES_COMPLETE.md
+LANGUAGE_SUPPORT.md
+README.md
+REAL_INTEGRATION_READY.md
+public/test-connection.html

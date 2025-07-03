@@ -75,7 +75,52 @@ export class McpClient implements McpClientInterface {
     // Return different mock tools based on the server command
     const command = serverConfig.command?.toLowerCase() || '';
     
-    if (command.includes('python')) {
+    if (command.includes('dotnet')) {
+      // Mock tools that match your real CatsMCP.WebApi server
+      return [
+        {
+          name: 'GetCats',
+          description: 'Get a list of all cats from the database',
+          inputSchema: {
+            type: 'object',
+            properties: {},
+            required: []
+          }
+        },
+        {
+          name: 'GetCat',
+          description: 'Get a specific cat by name',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              name: {
+                type: 'string',
+                description: 'The name of the cat to get details for'
+              }
+            },
+            required: ['name']
+          }
+        },
+        {
+          name: 'database_query',
+          description: 'Execute database queries',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              query: {
+                type: 'string',
+                description: 'SQL query to execute'
+              },
+              database: {
+                type: 'string',
+                description: 'Database name'
+              }
+            },
+            required: ['query', 'database']
+          }
+        }
+      ];
+    } else if (command.includes('python')) {
       return [
         {
           name: 'get_weather',
@@ -207,8 +252,79 @@ export class McpClient implements McpClientInterface {
   }
 
   private getMockToolResponse(name: string, parameters: Record<string, any>): McpToolResult {
-    // Return mock responses for demonstration
+    // Return mock responses that match your real CatsMCP.WebApi server
     switch (name) {
+      case 'GetCats':
+        return {
+          success: true,
+          result: [
+            {
+              CatId: 1,
+              Nombre: "Luna", 
+              Raza: "Mestizo",
+              OrigenRaza: "Desconocido",
+              RazaPura: false,
+              AniosExistenciaRaza: 100,
+              Popularidad: "Alta",
+              EstatusConservacion: "Estable"
+            },
+            {
+              CatId: 2,
+              Nombre: "Miau",
+              Raza: "Persa", 
+              OrigenRaza: "Persia",
+              RazaPura: true,
+              AniosExistenciaRaza: 500,
+              Popularidad: "Media",
+              EstatusConservacion: "Estable"
+            },
+            {
+              CatId: 3,
+              Nombre: "Garfield",
+              Raza: "Maine Coon",
+              OrigenRaza: "Estados Unidos", 
+              RazaPura: true,
+              AniosExistenciaRaza: 150,
+              Popularidad: "Alta",
+              EstatusConservacion: "Estable"
+            }
+          ]
+        };
+      
+      case 'GetCat':
+        const catName = parameters.name?.toLowerCase();
+        if (catName === 'luna') {
+          return {
+            success: true,
+            result: {
+              CatId: 1,
+              Nombre: "Luna",
+              Raza: "Mestizo", 
+              OrigenRaza: "Desconocido",
+              RazaPura: false,
+              AniosExistenciaRaza: 100,
+              Popularidad: "Alta",
+              EstatusConservacion: "Estable"
+            }
+          };
+        }
+        return {
+          success: false,
+          error: `Cat named '${parameters.name}' not found`
+        };
+      
+      case 'database_query':
+        if (parameters.query?.toLowerCase().includes('cat')) {
+          return {
+            success: true,
+            result: "Query executed successfully. Found 3 cats in database."
+          };
+        }
+        return {
+          success: true,
+          result: "Query executed successfully."
+        };
+      
       case 'get_weather':
         return {
           success: true,
@@ -276,19 +392,6 @@ export class McpClient implements McpClientInterface {
             operation: parameters.operation,
             path: parameters.path,
             result: 'Operation completed successfully (mock response)'
-          }
-        };
-      
-      case 'database_query':
-        return {
-          success: true,
-          result: {
-            query: parameters.query,
-            rows: [
-              { id: 1, name: 'Sample Data 1' },
-              { id: 2, name: 'Sample Data 2' }
-            ],
-            rowCount: 2
           }
         };
       

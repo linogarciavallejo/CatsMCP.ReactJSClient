@@ -2,7 +2,8 @@ import React, { useState, useCallback } from 'react';
 import ConnectionManager from './components/ConnectionManager';
 import ToolsList from './components/ToolsList';
 import ChatInterface from './components/ChatInterface';
-import { McpClient } from './services/McpClient';
+import { HttpMcpClient } from './services/HttpMcpClient'; // Use HTTP client for real server
+// import { McpClient } from './services/McpClient'; // Old mock client
 import { LLMServiceFactory } from './services/LLMServiceFactory';
 import { 
   McpTool, 
@@ -10,7 +11,8 @@ import {
   LLMConfig, 
   ConnectionStatus,
   McpClientInterface,
-  LLMServiceInterface
+  LLMServiceInterface,
+  SupportedLanguage
 } from './types';
 
 const App: React.FC = () => {
@@ -19,15 +21,24 @@ const App: React.FC = () => {
   const [tools, setTools] = useState<McpTool[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
   const [statusMessage, setStatusMessage] = useState<string>('');
+  const [selectedLanguage, setSelectedLanguage] = useState<SupportedLanguage>(
+    (import.meta.env.VITE_DEFAULT_LANGUAGE as SupportedLanguage) || 'en'
+  );
 
   const handleConnect = useCallback(async (serverConfig: McpServerConfig, llmConfig: LLMConfig) => {
     try {
       setConnectionStatus('connecting');
       setStatusMessage('Connecting to MCP server...');
 
-      // Initialize MCP client
-      const client = new McpClient();
-      await client.connect(serverConfig);
+      // Add language to server config
+      const configWithLanguage = {
+        ...serverConfig,
+        language: selectedLanguage
+      };
+
+      // Initialize MCP client (using HTTP client for real server connection)
+      const client = new HttpMcpClient();
+      await client.connect(configWithLanguage);
       setMcpClient(client);
 
       // List available tools
@@ -35,7 +46,7 @@ const App: React.FC = () => {
       setTools(availableTools);
 
       // Initialize LLM service based on provider
-      const llm = LLMServiceFactory.create(llmConfig, availableTools);
+      const llm = LLMServiceFactory.create(llmConfig, availableTools, client);
       setLlmService(llm);
 
       setConnectionStatus('connected');
@@ -45,7 +56,7 @@ const App: React.FC = () => {
       setStatusMessage(`Connection failed: ${error.message}`);
       console.error('Connection error:', error);
     }
-  }, []);
+  }, [selectedLanguage]);
 
   const handleDisconnect = useCallback(async () => {
     try {
@@ -63,6 +74,15 @@ const App: React.FC = () => {
     }
   }, [mcpClient]);
 
+  const handleLanguageChange = useCallback((language: SupportedLanguage) => {
+    setSelectedLanguage(language);
+    
+    // Update MCP client language if connected
+    if (mcpClient) {
+      mcpClient.setLanguage(language);
+    }
+  }, [mcpClient]);
+
   return (
     <div className="container">
       <header className="header">
@@ -75,14 +95,17 @@ const App: React.FC = () => {
         onDisconnect={handleDisconnect}
         connectionStatus={connectionStatus}
         statusMessage={statusMessage}
+        selectedLanguage={selectedLanguage}
+        onLanguageChange={handleLanguageChange}
       />
 
       {connectionStatus === 'connected' && (
         <>
-          <ToolsList tools={tools} />
+          <ToolsList tools={tools} language={selectedLanguage} />
           <ChatInterface 
             llmService={llmService}
             mcpClient={mcpClient}
+            language={selectedLanguage}
           />
         </>
       )}
