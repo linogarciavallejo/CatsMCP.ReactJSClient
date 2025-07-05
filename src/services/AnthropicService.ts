@@ -163,4 +163,33 @@ export class AnthropicService implements LLMServiceInterface {
   getConversationHistory(): Anthropic.Messages.MessageParam[] {
     return [...this.conversationHistory];
   }
+
+  getConversationStats(): {
+    messageCount: number;
+    estimatedTokens: number;
+    toolTokens: number;
+    modelLimit: number;
+    availableTokens: number;
+  } {
+    const messageCount = this.conversationHistory.length;
+    // Claude models typically have larger context windows
+    const modelLimit = 200000; // Claude 3.5 Sonnet has 200k tokens
+    const estimatedTokens = this.conversationHistory.reduce((sum, msg) => {
+      const content = Array.isArray(msg.content) 
+        ? msg.content.map(c => typeof c === 'string' ? c : JSON.stringify(c)).join(' ')
+        : typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content);
+      return sum + Math.ceil(content.length / 4);
+    }, 0);
+    const toolTokens = this.tools.length * 50; // Rough estimate
+    const reserveTokens = (this.config.maxTokens || 1000) + 500;
+    const availableTokens = modelLimit - reserveTokens - toolTokens;
+    
+    return {
+      messageCount,
+      estimatedTokens,
+      toolTokens,
+      modelLimit,
+      availableTokens
+    };
+  }
 }

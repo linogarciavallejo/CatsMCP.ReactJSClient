@@ -215,4 +215,30 @@ Please provide a helpful response to the user based on this tool result.`;
   getConversationHistory(): Array<{ role: string; content: string }> {
     return [...this.conversationHistory];
   }
+
+  getConversationStats(): {
+    messageCount: number;
+    estimatedTokens: number;
+    toolTokens: number;
+    modelLimit: number;
+    availableTokens: number;
+  } {
+    const messageCount = this.conversationHistory.length;
+    // Ollama models vary, but most have smaller context windows
+    const modelLimit = 4096; // Conservative estimate for most Ollama models
+    const estimatedTokens = this.conversationHistory.reduce((sum, msg) => {
+      return sum + Math.ceil(msg.content.length / 4);
+    }, 0);
+    const toolTokens = this.tools.length * 50; // Rough estimate
+    const reserveTokens = (this.config.maxTokens || 1000) + 500;
+    const availableTokens = modelLimit - reserveTokens - toolTokens;
+    
+    return {
+      messageCount,
+      estimatedTokens,
+      toolTokens,
+      modelLimit,
+      availableTokens
+    };
+  }
 }
