@@ -55,7 +55,7 @@ export interface AnthropicConfig extends LLMConfig {
 
 export interface OpenAIConfig extends LLMConfig {
   provider: 'openai';
-  model: 'gpt-4-turbo-preview' | 'gpt-4' | 'gpt-3.5-turbo';
+  model: 'gpt-4o' | 'gpt-4o-mini' | 'gpt-4-turbo' | 'gpt-4-turbo-preview' | 'gpt-4' | 'gpt-3.5-turbo';
 }
 
 export interface OllamaConfig extends LLMConfig {
@@ -113,6 +113,13 @@ export interface LLMServiceInterface {
   updateTools(tools: McpTool[]): void;
   clearHistory(): void;
   getConversationHistory(): any[];
+  getConversationStats?(): {
+    messageCount: number;
+    estimatedTokens: number;
+    toolTokens: number;
+    modelLimit: number;
+    availableTokens: number;
+  };
 }
 
 // Error Types

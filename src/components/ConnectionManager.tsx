@@ -32,9 +32,23 @@ const ConnectionManager: React.FC<ConnectionManagerProps> = ({
   const [baseUrl, setBaseUrl] = useState<string>(
     import.meta.env.VITE_OLLAMA_BASE_URL || 'http://localhost:11434'
   );
-  const [model, setModel] = useState<string>(
-    import.meta.env.VITE_DEFAULT_ANTHROPIC_MODEL || 'claude-3-5-sonnet-20241022'
-  );
+
+  // Set initial model based on the initial LLM provider
+  const getInitialModel = () => {
+    const initialProvider = (import.meta.env.VITE_DEFAULT_LLM_PROVIDER as LLMProvider) || 'anthropic';
+    switch (initialProvider) {
+      case 'anthropic':
+        return import.meta.env.VITE_DEFAULT_ANTHROPIC_MODEL || 'claude-3-5-sonnet-20241022';
+      case 'openai':
+        return import.meta.env.VITE_DEFAULT_OPENAI_MODEL || 'gpt-4-turbo';
+      case 'ollama':
+        return import.meta.env.VITE_DEFAULT_OLLAMA_MODEL || 'deepseek-coder';
+      default:
+        return 'claude-3-5-sonnet-20241022';
+    }
+  };
+
+  const [model, setModel] = useState<string>(getInitialModel());
 
   const handleProviderChange = (provider: LLMProvider) => {
     setLlmProvider(provider);
@@ -47,7 +61,7 @@ const ConnectionManager: React.FC<ConnectionManagerProps> = ({
         setModel(import.meta.env.VITE_DEFAULT_ANTHROPIC_MODEL || 'claude-3-5-sonnet-20241022');
         break;
       case 'openai':
-        setModel(import.meta.env.VITE_DEFAULT_OPENAI_MODEL || 'gpt-4-turbo-preview');
+        setModel(import.meta.env.VITE_DEFAULT_OPENAI_MODEL || 'gpt-4-turbo');
         break;
       case 'ollama':
         setModel(import.meta.env.VITE_DEFAULT_OLLAMA_MODEL || 'deepseek-coder');
@@ -79,7 +93,7 @@ const ConnectionManager: React.FC<ConnectionManagerProps> = ({
     const llmConfig: LLMConfig = {
       provider: llmProvider,
       model,
-      maxTokens: 1000,
+      maxTokens: 2000, // Increased from 1000 to give more room for detailed responses
       ...(llmProvider !== 'ollama' && { apiKey: effectiveApiKey }),
       ...(llmProvider === 'ollama' && { baseUrl })
     };
@@ -106,9 +120,12 @@ const ConnectionManager: React.FC<ConnectionManagerProps> = ({
         ];
       case 'openai':
         return [
-          { value: 'gpt-4-turbo-preview', label: 'GPT-4 Turbo' },
-          { value: 'gpt-4', label: 'GPT-4' },
-          { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' }
+          { value: 'gpt-4o', label: 'GPT-4o (128k tokens)' },
+          { value: 'gpt-4o-mini', label: 'GPT-4o Mini (128k tokens)' },
+          { value: 'gpt-4-turbo', label: 'GPT-4 Turbo (128k tokens)' },
+          { value: 'gpt-4-turbo-preview', label: 'GPT-4 Turbo Preview (128k tokens)' },
+          { value: 'gpt-4', label: 'GPT-4 (8k tokens)' },
+          { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo (16k tokens)' }
         ];
       case 'ollama':
         return [
