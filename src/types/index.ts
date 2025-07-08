@@ -46,6 +46,8 @@ export interface LLMConfig {
   baseUrl?: string;
   model: string;
   maxTokens?: number;
+  temperature?: number; // Optional, default is 0.1
+  topP?: number; // Optional, default is 1.0  
 }
 
 export interface AnthropicConfig extends LLMConfig {
@@ -55,7 +57,7 @@ export interface AnthropicConfig extends LLMConfig {
 
 export interface OpenAIConfig extends LLMConfig {
   provider: 'openai';
-  model: 'gpt-4-turbo-preview' | 'gpt-4' | 'gpt-3.5-turbo';
+  model: 'gpt-4o' | 'gpt-4o-mini' | 'gpt-4-turbo' | 'gpt-4-turbo-preview' | 'gpt-4' | 'gpt-3.5-turbo';
 }
 
 export interface OllamaConfig extends LLMConfig {

@@ -3,7 +3,8 @@ import {
   McpServerConfig, 
   McpTool, 
   McpToolResult,
-  McpError 
+  McpError,
+  SupportedLanguage
 } from '../types';
 
 /**
@@ -21,6 +22,7 @@ import {
 export class McpClient implements McpClientInterface {
   private connected: boolean = false;
   private tools: McpTool[] = [];
+  private selectedLanguage: SupportedLanguage = 'en';
 
   async connect(serverConfig: McpServerConfig): Promise<void> {
     try {
@@ -30,6 +32,10 @@ export class McpClient implements McpClientInterface {
       
       // Simulate connection delay
       await new Promise(resolve => setTimeout(resolve, 1000));
+
+      if (serverConfig.language) {
+        this.selectedLanguage = serverConfig.language;
+      }
       
       this.connected = true;
       
@@ -61,14 +67,23 @@ export class McpClient implements McpClientInterface {
     }
 
     console.log(`Calling tool: ${name} with parameters:`, parameters);
+    console.log(`Using language: ${this.selectedLanguage}`);
+
+    // Add language parameter to mock tool calls
+    const toolParams = { ...parameters, language: parameters.language || this.selectedLanguage };
+
     
     // In a real implementation, this would send a tool call request to the MCP server
     // For now, we'll return mock responses
-    return this.getMockToolResponse(name, parameters);
+    return this.getMockToolResponse(name, toolParams);
   }
 
   isConnected(): boolean {
     return this.connected;
+  }
+
+  setLanguage(language: SupportedLanguage): void {
+    this.selectedLanguage = language;
   }
 
   private getMockTools(serverConfig: McpServerConfig): McpTool[] {

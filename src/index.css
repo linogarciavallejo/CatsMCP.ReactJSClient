@@ -178,6 +178,29 @@ code {
   border-bottom: 1px solid #e9ecef;
   background: #f8f9fa;
   border-radius: 10px 10px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.chat-controls .btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  background: #6c757d;
+  border: none;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.chat-controls .btn:hover {
+  background: #5a6268;
 }
 
 .chat-messages {
@@ -218,6 +241,90 @@ code {
   font-style: italic;
 }
 
+.message.assistant .message-content {
+  line-height: 1.6;
+}
+
+.message.assistant .message-content h1,
+.message.assistant .message-content h2,
+.message.assistant .message-content h3,
+.message.assistant .message-content h4,
+.message.assistant .message-content h5,
+.message.assistant .message-content h6 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+}
+
+.message.assistant .message-content h1:first-child,
+.message.assistant .message-content h2:first-child,
+.message.assistant .message-content h3:first-child {
+  margin-top: 0;
+}
+
+.message.assistant .message-content p:last-child {
+  margin-bottom: 0;
+}
+
+.message.assistant .message-content ul,
+.message.assistant .message-content ol {
+  padding-left: 1.5em;
+}
+
+.message.assistant .message-content li {
+  margin-bottom: 0.25em;
+}
+
+.message.assistant .message-content table {
+  border-collapse: collapse;
+  margin: 1em 0;
+  width: 100%;
+}
+
+.message.assistant .message-content th,
+.message.assistant .message-content td {
+  border: 1px solid #dee2e6;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.message.assistant .message-content th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+.message.assistant .message-content pre {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 1em;
+  overflow-x: auto;
+  margin: 1em 0;
+}
+
+.message.assistant .message-content code {
+  background-color: #f8f9fa;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 0.9em;
+  color: #e74c3c;
+}
+
+.message.assistant .message-content pre code {
+  background-color: transparent;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+
+.message.assistant .message-content blockquote {
+  border-left: 4px solid #3498db;
+  margin: 1em 0;
+  padding-left: 1em;
+  color: #7f8c8d;
+  font-style: italic;
+}
+
 .chat-input {
   padding: 1rem 2rem;
   border-top: 1px solid #e9ecef;
@@ -250,6 +357,31 @@ code {
   border-radius: 50%;
   border-top-color: #fff;
   animation: spin 1s ease-in-out infinite;
+}
+
+.debug-panel {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 1rem;
+  margin: 1rem 0;
+  font-size: 0.875rem;
+}
+
+.debug-panel h4 {
+  margin-bottom: 0.5rem;
+  color: #495057;
+}
+
+.debug-panel > div {
+  margin-bottom: 0.25rem;
+  color: #6c757d;
+}
+
+.debug-panel > div:last-child {
+  margin-bottom: 0;
+  font-weight: 600;
+  color: #495057;
 }
 
 @keyframes spin {
